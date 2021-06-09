@@ -1,4 +1,4 @@
-function [xi, dcp, Cl]=LumpedVortex(coord,c,alpha,N, Qinf, rho, cambered)
+function [xi, xi_trans, zi_trans, p, Cl]=LumpedVortex(coord,c,alpha,N, Qinf, rho, cambered)
 %% Lumped-vortex element
 % Input:
 % coord - (2,n) table with x,z coordinates of the mean camber line
@@ -73,6 +73,20 @@ dcp = p/(0.5*rho*Qinf^2*c);     % pressure coefficient distribution
 L=sum(dL);      % total lift
 Cl=L/(0.5*rho*Qinf^2*c);    % total lift coefficient
 
+x0 = c/4;% quarter chord points around which we rotate flat plate
+z0 = 0;
+xi_trans = zeros(1,N);
+zi_trans = zeros(1,N);
+if ~cambered % translate coordinates of collocation points
+    xi_trans = xi*cos(alpha);
+    zi_trans = (x0-xi)*sin(alpha);
+end
+
+% figure()
+% hold on
+% plot(xi,zi)
+% plot(xi_trans,zi_trans)
+% hold off
 end
 
 

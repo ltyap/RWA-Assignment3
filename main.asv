@@ -35,6 +35,8 @@ p_grid = rand(size(x_grid));
 u_grid = Uinf*ones(size(x_grid));
 v_grid = zeros(size(x_grid));
 
+x_grid_plate = ;
+
 [~,xi, zi,p,Cl]=LumpedVortex(coord,chord, aoa,N, Uinf, rho,0);
 
 figure()
