@@ -1,4 +1,4 @@
-% RWA - assignment 3
+% RWA - assignment 3 - steady cases
 clc
 clear all
 close all
