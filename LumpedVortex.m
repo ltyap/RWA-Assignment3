@@ -1,4 +1,4 @@
-function [xi, xi_trans, zi_trans, p, Cl,circ, vortex_coord]=LumpedVortex(coord,c,alpha,N, Qinf, rho, cambered, unsteady, circ_old, vortex_coord_old, dalpha)
+function [xi, xi_trans, zi_trans, p, Cl]=LumpedVortex(coord,c,alpha,N, Qinf, rho, cambered)
 %% Lumped-vortex element
 % Input:
 % coord - (2,n) table with x,z coordinates of the mean camber line
@@ -8,9 +8,6 @@ function [xi, xi_trans, zi_trans, p, Cl,circ, vortex_coord]=LumpedVortex(coord,c
 % Qinf - value of freestream velocity [m/s]
 % rho - air density [kg/m3] 
 % cambered - bool property, 0 for flat plate, 1 for cambered airfoil
-% unsteady - bool property, 0 for steady calculations, 1 for unsteady
-% circ_old - value of circulation for previous time step
-% dalpha - radial pitch for one time step
 
 h = 1/N;     % step size for N uniform grids for x  
 alpha = alpha/180*pi ;  % translating the angle of attack into radians
@@ -46,46 +43,22 @@ for i =1:N      % loop over each panel
 end
 
 %% Calculate influence matrix coefficients
-if unsteady     % additional DOF for the unknown wake
-    u = zeros(N+1, N+1);
-    w = zeros(N+1, N+1);
-    coeff = zeros(N+1, N+1);
-else % steady calculations
-    u = zeros(N, N);
-    w = zeros(N, N);
-    coeff = zeros(N, N);
-end
-
+u = zeros(N, N);
+w = zeros(N, N);
+coeff = zeros(N, N);
 for i=1:N
     for j=1:N
         Gamma=1;    % assuming singular gamma distribution
-        u_ind = v_2D_from_vortex(Gamma, [xj(j), zj(j)], [xi(i), zi(i)]); % not sure about this
-        u(i,j) = u_ind(1);
-        w(i,j) = u_ind(2);
-%         r_sq=(xi(i)-xj(j))^2 + (zi(i)-zj(j))^2;
-%         u(i,j)=Gamma/(2*pi*r_sq)*(zi(i)-zj(j));     % velocity of arbitrary point (x-coordinate)
-%         w(i,j)=-Gamma/(2*pi*r_sq)*(xi(i)-xj(j));    % velocity of arbitrary point (z-coordinate)
+        r_sq=(xi(i)-xj(j))^2 + (zi(i)-zj(j))^2;
+        u(i,j)=Gamma/(2*pi*r_sq)*(zi(i)-zj(j));     % velocity of arbitrary point (x-coordinate)
+        w(i,j)=-Gamma/(2*pi*r_sq)*(xi(i)-xj(j));    % velocity of arbitrary point (z-coordinate)
         coeff(i,j)=dot([u(i,j),w(i,j)],n(i,:));     % influence of element j acting on element i
-    end
-end
-
-if unsteady
-    coeff(N+1,:) = ones(N+1,1);
-    for i=1:N
-        u_ind = v_2D_from_vortex(Gamma, vortex_coord_old, [xi(i), zi(i)]); %???
-        u(i,N+1) = u_ind(1);
-        w(i,N+1) = u_ind(2);
-        coeff(i,N+1)=dot([u(i,N+1),w(i,N+1)],n(i,:));     % influence of element j acting on element i
-%         coeff(:,i) = ; % influence of wake vortex
     end
 end
 
 %% Solving the linear equation
 % Right-hand-side vector
 rhs=-Qinf*sin(alpha+a);
-if unsteady
-    rhs=[rhs,circ_old]; 
-end
 gamma=coeff\rhs';   % solve linear equation for vorticity distribution gamma
 
 %% Computing pressure and lift
@@ -114,16 +87,6 @@ end
 % plot(xi,zi)
 % plot(xi_trans,zi_trans)
 % hold off
-%% Calculate circulation and its coordinates
-if unsteady
-    circ = gamma(end);
-%     vortex_coord = [1,1]; along the path of the trailing edge, 0.2-0.3 of
-%     the movement in the latest time step
-%   only for pitching movement
-    vortex_coord(1) = 1/4*c+3/4*c*cos(alpha-dalpha);
-    vortex_coord(2) = -3/4*c*sin(alpha-dalpha);
-end
-
 end
 
 
