@@ -13,7 +13,8 @@ rho = 1.225;
 x = [0,chord/4,chord];
 z = [0,0,0];
 
-t = [0:0.1:5];
+dt = 0.1;
+t = [0:dt:5];
 k = 0.02; %[0.02,0.05,0.1] reduced frequency
 Omega = k*2*Uinf/chord;
 theta0 = 0.5;
@@ -21,9 +22,12 @@ pitch = theta0*sin(Omega*t);% pitching motion
 
 % first time step
 aoa = pitch(1);
-old_vortex.ccord = [1,0];
-old_vortex.gamma = 0;
-[p,Cl(1),old_vortex]=LumpedVortex(coord,chord, aoa,N, Uinf, rho,0,1,old_vortex,0);
+[p,Cl(1),vertices]=LumpedVortex_different(coord,chord, aoa,N, Uinf, rho,0,1,pitch(1));
+
+% convect vertices according to their speeds
+vertices.coord(:,1) = vertices.coord(:,1)+vertices.speed(:,1)*dt; % x coordinate
+vertices.coord(:,2) = vertices.coord(:,2)+vertices.speed(:,2)*dt; % z coordinate
+
 zi = (chord/4-x)*sin(aoa);
 for i=1:length(x)
     if x(i)<chord/4
@@ -44,7 +48,11 @@ getframe(gcf);
 
 for i=2:length(t) % time loop
     aoa = pitch(i); % angle of attack changes (in radians)
-    [p,Cl(i),old_vortex]=LumpedVortex(coord,chord, aoa,N, Uinf, rho,0,1, old_vortex, pitch(i)-pitch(i-1));
+    [p,Cl(i),vertices]=LumpedVortex_different(coord,chord, aoa,N, Uinf, rho,0,1,pitch(i)-pitch(i-1),vertices);
+    
+    % convect vertices according to their speeds
+    vertices.coord(:,1) = vertices.coord(:,1)+vertices.speed(:,1)*dt; % x coordinate
+    vertices.coord(:,2) = vertices.coord(:,2)+vertices.speed(:,2)*dt; % z coordinate
     
     zi = (chord/4-x)*sin(aoa);
     for i=1:length(x)
@@ -57,7 +65,7 @@ for i=2:length(t) % time loop
     
     hold on
     plot(xi,zi, 'k','LineWidth', 1.5)
-    scatter(old_vortex.coord(1), old_vortex.coord(2))
+    scatter(vertices.coord(:,1), vertices.coord(:,2))
     hold off
     xlim([-chord 2*chord])
     ylim([-chord chord])

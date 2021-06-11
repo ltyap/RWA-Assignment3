@@ -14,7 +14,7 @@ coord(:,2) = zeros(1,100);
 N = 10; % number of segments
 
 for i=1:length(aoa)
-    [~,Cl(i)]=LumpedVortex(coord,chord, aoa(i),N, Uinf, rho,0,0,0,0);
+    [~,Cl(i)]=LumpedVortex_different(coord,chord, aoa(i),N, Uinf, rho,0);
 end
 
 figure()
@@ -35,7 +35,7 @@ p_grid = rand(size(x_grid));
 u_grid = Uinf*ones(size(x_grid));
 v_grid = zeros(size(x_grid));
 
-[p,Cl] = LumpedVortex(coord, chord, aoa,N, Uinf, rho,0,0,0,0);
+[p,Cl] = LumpedVortex_different(coord, chord, aoa,N, Uinf, rho,0,0,0,0);
 
 xi = [0,chord/4,chord];
 zi = [0,0,0];

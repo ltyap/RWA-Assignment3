@@ -1,0 +1,16 @@
+function speeds = vortex_speed(xj,zj,gamma,vertices, Uinf)
+
+for i=1:length(vertices.coord(:,1))
+    for j=1:length(xj)  % velocities induced by airfoil
+        u_ind = v_2D_from_vortex(1, new_vortex.coord, [xi(i), zi(i)]); %???
+        speeds(i,1) = speeds(i,1)+u_ind(1);
+        speeds(i,) = speeds(i,1)+u_ind(1);
+    end
+    
+    for j=1:length(vertices.coord(:,1)) % velocities induces by other shed vertices
+    end
+    
+    speeds(i,1) = 0.05*Uinf;
+    speeds(i,2) = 0.1;
+end
+end
