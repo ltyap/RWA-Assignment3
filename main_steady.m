@@ -7,18 +7,18 @@ close all
 Uinf = 10;  % freestream velocity [m/s]
 rho = 1.225;    % air density
 
-aoa = [-15:1:15];   % array of considered angles of attack
+aoa = deg2rad([-15:1:15]);   % array of considered angles of attack
 chord = 1;
 coord(:,1) = linspace(0,chord,100);  % flat plate coordinates (x,z)
 coord(:,2) = zeros(1,100);
 N = 10; % number of segments
 
 for i=1:length(aoa)
-    [~,~,~,~,Cl(i)]=LumpedVortex(coord,chord, aoa(i),N, Uinf, rho,0);
+    [~,Cl(i)]=LumpedVortex(coord,chord, aoa(i),N, Uinf, rho,0,0,0,0);
 end
 
 figure()
-plot(aoa,Cl)
+plot(rad2deg(aoa),Cl)
 grid on
 grid minor
 xlabel("Angle of attack [^\circ]")
@@ -26,7 +26,7 @@ ylabel ("Lift coefficient C_L")
 
 %% trying presure and velocity fields
 p_atm = 101300;
-aoa=15;
+aoa=deg2rad(15);
 N=10;
 
 [x_grid, z_grid] = meshgrid(linspace(-chord,2*chord,3*N),linspace(-1.5*chord,1.5*chord,3*N)) ;
@@ -35,7 +35,18 @@ p_grid = rand(size(x_grid));
 u_grid = Uinf*ones(size(x_grid));
 v_grid = zeros(size(x_grid));
 
-[~,xi, zi,p,Cl]=LumpedVortex(coord,chord, aoa,N, Uinf, rho,0);
+[p,Cl] = LumpedVortex(coord, chord, aoa,N, Uinf, rho,0,0,0,0);
+
+xi = [0,chord/4,chord];
+zi = [0,0,0];
+zi = (chord/4-xi)*sin(aoa);
+for i=1:length(xi)
+    if xi(i)<chord/4
+        xi(i) = chord/4-(chord/4-xi(i))*cos(aoa);
+    else
+        xi(i) = chord/4+(xi(i)-chord/4)*cos(aoa);
+    end
+end
 
 figure()
 hold on
