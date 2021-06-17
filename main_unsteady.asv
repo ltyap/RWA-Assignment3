@@ -22,7 +22,7 @@ pitch = theta0*sin(Omega*t);% pitching motion
 
 % first time step
 aoa = pitch(1);
-[p,Cl(1),vertices]=LumpedVortex_different(coord, chord, aoa, Npan, Uinf, rho,0, 1, pitch(1));
+[p,Cl(1),vertices]=LumpedVortex_different(coord, chord, aoa, Npan, Uinf, rho, 0, 1, pitch(1));
 
 % convect vertices according to their speeds
 vertices.coord(:,1) = vertices.coord(:,1)+vertices.speed(:,1)*dt; % x coordinate

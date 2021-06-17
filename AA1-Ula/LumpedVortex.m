@@ -70,8 +70,3 @@ L=sum(dL);      % total lift
 Cl=L/(0.5*rho*Qinf^2*c);    % total lift coefficient
 
 end
-
-
-
-
-

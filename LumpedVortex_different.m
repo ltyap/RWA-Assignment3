@@ -1,4 +1,4 @@
-function [p, Cl,vertices]=LumpedVortex_different(coord,c,alpha,N, Qinf, rho, cambered, unsteady,dalpha,vertices)
+function [p, Cl,vertices]=LumpedVortex_different(coord,c,alpha,N, Qinf, rho, cambered, unsteady, dalpha, vertices)
 %% Lumped-vortex element
 % here - we rotate all of the points and then construct the coefficient
 % matrix
@@ -33,7 +33,7 @@ else % flat plate
     z = zeros(1,N+1);
 end
 
-[x,z,~,~] = rotate_aoa(x,z,x,z,alpha,c);
+[x,z,~,~] = rotate_aoa_vector(x,z,x,z,alpha,c);
 xj = zeros(1, N);
 xi = zeros(1, N);
 zj = zeros(1, N);
@@ -49,7 +49,7 @@ for i =1:N      % loop over each panel
     xi(i)= x(i)+3/4*(x(i+1)-x(i));
     zi(i)= z(i)+3/4*(z(i+1)-z(i));
     
-    [xi(i),zi(i),xj(i),zj(i)] = rotate_aoa(xi(i),zi(i),xj(i),zj(i),alpha,c);
+    [xi(i),zi(i),xj(i),zj(i)] = rotate_aoa_vector(xi(i),zi(i),xj(i),zj(i),alpha,c);
     
     % Normal vectors and panel slopes in collocation points
     a(i)=atan2((z(i+1)-z(i)),(x(i+1)-x(i)));    % angle of panel used for calculating normal vector
