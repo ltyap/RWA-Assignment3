@@ -26,16 +26,19 @@ ylabel ("Lift coefficient C_L")
 
 %% trying presure and velocity fields
 p_atm = 101300;
-aoa=deg2rad(15);
-N=10;
+aoa = deg2rad(15);
+N = 40;
 
-[x_grid, z_grid] = meshgrid(linspace(-chord,2*chord,3*N),linspace(-1.5*chord,1.5*chord,3*N)) ;
+[x_grid, z_grid] = meshgrid(linspace(-chord,2*chord,100),linspace(-1.5*chord,1.5*chord,100)) ;
 % p_grid = p_atm*ones(size(x_grid));
-p_grid = rand(size(x_grid));
-u_grid = Uinf*ones(size(x_grid));
-v_grid = zeros(size(x_grid));
+% p_grid = rand(size(x_grid));
+% u_grid = Uinf*ones(size(x_grid));
+% v_grid = zeros(size(x_grid));
 
-[p,Cl] = LumpedVortex_different(coord, chord, aoa,N, Uinf, rho,0,0,0,0);
+[p,Cl,vertices] = LumpedVortex_different(coord, chord, aoa,N, Uinf, rho,0);
+
+[u_grid, v_grid] = velocity_field(Uinf, x_grid,z_grid,vertices); % calculate velocity in field
+p_grid = pressure_field(Uinf, p_atm, rho, x_grid, z_grid, u_grid, v_grid);
 
 xi = [0,chord/4,chord];
 zi = [0,0,0];
@@ -62,7 +65,9 @@ title("Pressure field")
 
 figure()
 hold on
-quiver(x_grid,z_grid,u_grid,v_grid, 0.5)
+contourf(x_grid,z_grid,sqrt(u_grid.^2+v_grid.^2),'Linecolor', 'none')
+colorbar
+quiver(x_grid,z_grid,u_grid,v_grid)
 plot(xi,zi,'k','LineWidth', 1.5)
 hold off
 xlim([-chord 2*chord])

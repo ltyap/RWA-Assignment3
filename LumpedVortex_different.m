@@ -5,7 +5,7 @@ function [p, Cl,vertices]=LumpedVortex_different(coord,c,alpha,N, Qinf, rho, cam
 % Input:
 % coord - (2,n) table with x,z coordinates of the mean camber line
 % c - chord length
-% alpha - angle of attack in degrees
+% alpha - angle of attack in radians
 % N - number of sub-panels, assuming equal x-length
 % Qinf - value of freestream velocity [m/s]
 % rho - air density [kg/m3]
@@ -33,7 +33,7 @@ else % flat plate
     z = zeros(1,N+1);
 end
 
-[x,z,~,~] = rotate_aoa_vector(x,z,x,z,alpha,c);
+[x,z,~,~] = rotate_aoa_vector(x,z,x,z,c,alpha);
 xj = zeros(1, N);
 xi = zeros(1, N);
 zj = zeros(1, N);
@@ -49,7 +49,7 @@ for i =1:N      % loop over each panel
     xi(i)= x(i)+3/4*(x(i+1)-x(i));
     zi(i)= z(i)+3/4*(z(i+1)-z(i));
     
-    [xi(i),zi(i),xj(i),zj(i)] = rotate_aoa_vector(xi(i),zi(i),xj(i),zj(i),alpha,c);
+    [xi(i),zi(i),xj(i),zj(i)] = rotate_aoa_vector(xi(i),zi(i),xj(i),zj(i),c,alpha);
     
     % Normal vectors and panel slopes in collocation points
     a(i)=atan2((z(i+1)-z(i)),(x(i+1)-x(i)));    % angle of panel used for calculating normal vector
@@ -136,9 +136,14 @@ Cl=L/(0.5*rho*Qinf^2*c);    % total lift coefficient
 % plot(xi_trans,zi_trans)
 % hold off
 
-if unsteady
+if unsteady %%%%% DONT NEED TO DO WAKE ROLLUP, CAN JUST CONVECT WITH Uinf
     % calculate speed of vertices
     vertices.speed = vortex_speed(xj,zj,gamma,vertices,Qinf);
+end
+
+if ~unsteady  %% for steady simulation output gamma and vertices on airfoil to caluclate velocity field
+    vertices.coord = [xj', zj'];    
+    vertices.gamma = gamma;
 end
 end
 
