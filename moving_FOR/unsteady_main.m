@@ -6,10 +6,11 @@ Qinf = sqrt(Uinf^2+Winf^2);
 rho = 1.255;
 chord = 1;
 Npan = 10;  % number of panels
-k = 0.05; %[0.02,0.05,0.1] reduced frequency
+k = 0.1; %[0.02,0.05,0.1] reduced frequency
 omega = k*2*Uinf/chord;
-dt = 0.1;
-Nts = 70;  % number of time steps
+theta0 = 0.5;
+dt = 0.05;
+Nts = 100;  % number of time steps
 it = 0; % time step counter t = it*dt
 
 % discretization
@@ -36,16 +37,17 @@ kinematics.X0 = -Uinf*t;   % position of LE
 kinematics.X0dot = -Uinf;  % X speed
 kinematics.Z0 = 0;     % position of LE
 kinematics.Z0dot = 0;  % Z speed
-kinematics.theta = 0.25*sin(omega*t);
-kinematics.thetadot = 0.25*omega*cos(omega*t);
+kinematics.theta = theta0*sin(omega*t);
+kinematics.thetadot = theta0*omega*cos(omega*t);
 
 vertices.gamma = [];
 vertices.x = [];
 vertices.z = [];   
 [Cl_0,~,~,gamma_old] = LumpedVortex(1, Npan, kinematics, coeff, panels, chord, Qinf, rho, vertices);
 
-figure()
-% hold on
+p_atm = 101300;
+Ngrid = 100;
+
 TE_new = [cos(kinematics.theta), sin(kinematics.theta); -sin(kinematics.theta), cos(kinematics.theta)]*[panels.x(end);panels.z(end)]+[kinematics.X0;kinematics.Z0] ;    %location of TE at t=dt
 for it=1:Nts
 % old TE position
@@ -53,35 +55,68 @@ TE_old = TE_new;
     
 t = it*dt;
 kinematics.X0 = -Uinf*t;   % position of LE
-kinematics.theta = 0.25*sin(omega*t);
-kinematics.thetadot = 0.25*omega*cos(omega*t);
+kinematics.theta = theta0*sin(omega*t);
+kinematics.thetadot = theta0*omega*cos(omega*t);
 
 TE_new = [cos(kinematics.theta), sin(kinematics.theta); -sin(kinematics.theta), cos(kinematics.theta)]*[panels.x(end);panels.z(end)]+[kinematics.X0;kinematics.Z0];    %location of TE at t=dt
 temp = [cos(kinematics.theta), sin(kinematics.theta); -sin(kinematics.theta), cos(kinematics.theta)]*[panels.x;panels.z]+[kinematics.X0;kinematics.Z0];    %location of TE at t=dt
-% clf
-% hold on
+
 
 [Cl(it),~,vertices, gamma] = LumpedVortex(0, Npan, kinematics, coeff, panels, chord, Qinf, rho, vertices, TE_old, TE_new, gamma_old, dt);
 gamma_old = gamma;
-% convect vertices - just with freestream, does not calculate induced
-% velocity
-plot(temp(1,:), temp(2,:),'k', 'LineWidth',1.5)
+plate_vert.gamma = [gamma(1:end-1);vertices.gamma'];   % vertices on the panels
+plate_vert.coord = [[cos(kinematics.theta), sin(kinematics.theta); -sin(kinematics.theta), cos(kinematics.theta)]*[panels.xj;panels.zj]+...
+    [kinematics.X0;kinematics.Z0], [vertices.x;vertices.z]] ;
+
+[x_grid, z_grid] = meshgrid(linspace(temp(1,1)-chord,temp(1,end)+2*chord,Ngrid),linspace(-1.5*chord,1.5*chord,Ngrid)) ;
+[u_grid, v_grid] = velocity_field(Uinf, Winf, x_grid, z_grid, plate_vert); % calculate velocity in field
+
+% plotting - velocity field
+figure(1)
+clf
 hold on
-scatter(vertices.x, vertices.z,10,'filled')
+contourf(x_grid,z_grid,sqrt(u_grid.^2+v_grid.^2),'Linecolor', 'none')
+colorbar
+quiver(x_grid(1:2:end,1:2:end),z_grid(1:2:end,1:2:end),u_grid(1:2:end,1:2:end),v_grid(1:2:end,1:2:end), 1.5, 'k')
+plot(temp(1,:), temp(2,:),'k','LineWidth', 1.5)
 hold off
+caxis([5 15])
+xlabel("x")
+ylabel("z")
+title("Velocity field")
+% scatter(vertices.x, vertices.z,10,'filled')
 axis equal
 ylim([-1 1])
-xlim([min(temp(1,:))-chord max(vertices.x)])
+xlim([min(temp(1,:))-chord max(temp(1,:))+2*chord])
 drawnow;
-% hold off
-pause(0.2)
+pause(0.01)
+
+% convect vertices - just with freestream, does not calculate induced velocity
 vertices.x = vertices.x+Uinf*dt;
 vertices.z = vertices.z+Winf*dt;
 end
-% hold off
+
 figure()
-plot(1:Nts,rad2deg(0.25*sin([1:Nts]*omega*dt)))
+plot(rad2deg(theta0*sin([1:Nts]*omega*dt)),Cl)
+grid on
+grid minor
+xlabel("\theta [^\circ]")
+ylabel("C_L")
+
 figure()
-plot(1:Nts, Cl)
+hold on
+plot([1:Nts]*dt,rad2deg(theta0*sin([1:Nts]*omega*dt)))
+% plot([1:Nts]*dt,rad2deg(theta0*sin(2*pi*[1:Nts]*omega*dt)))
+hold off
+grid on
+grid minor
+xlabel("t")
+ylabel("\theta")
+
 figure()
-plot(rad2deg(sin([1:Nts]*omega*dt)),Cl)
+plot([1:Nts]*dt, Cl)
+grid on
+grid minor
+xlabel("t")
+ylabel("C_L")
+
