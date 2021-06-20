@@ -100,9 +100,10 @@ if unsteady
     else
         rhs=[rhs,vertices.gamma(end)];
     end
-    temp=0;
+    
     % add influence of previous wakes
     for i=1:length(xi)
+        temp=0;
         for j=1:length(vertices.coord(:,1))-1
             u_ind = v_2D_from_vortex(vertices.gamma(j), vertices.coord(j,:), [xi(i), zi(i)]); %???
             temp = temp + dot([u_ind(1),u_ind(2)],n(i,:));
@@ -136,10 +137,11 @@ Cl=L/(0.5*rho*Qinf^2*c);    % total lift coefficient
 % plot(xi_trans,zi_trans)
 % hold off
 
-if unsteady %%%%% DONT NEED TO DO WAKE ROLLUP, CAN JUST CONVECT WITH Uinf
-    % calculate speed of vertices
-    vertices.speed = vortex_speed(xj,zj,gamma,vertices,Qinf);
-end
+% if unsteady %%%%% DONT NEED TO DO WAKE ROLLUP, CAN JUST CONVECT WITH Uinf
+%     % calculate speed of vertices
+% %     vertices.speed = vortex_speed(xj,zj,gamma,vertices,Qinf);
+% %     vertices.speed = [Qinf*ones(length(vertices.gamma)), zeros(length(vertices.gamma))];
+% end
 
 if ~unsteady  %% for steady simulation output gamma and vertices on airfoil to caluclate velocity field
     vertices.coord = [xj', zj'];    

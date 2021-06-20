@@ -26,7 +26,7 @@ ylabel ("Lift coefficient C_L")
 
 %% trying presure and velocity fields
 p_atm = 101300;
-aoa = deg2rad(15);
+aoa = deg2rad(0);
 N = 40;
 
 [x_grid, z_grid] = meshgrid(linspace(-chord,2*chord,100),linspace(-1.5*chord,1.5*chord,100)) ;
@@ -67,7 +67,7 @@ figure()
 hold on
 contourf(x_grid,z_grid,sqrt(u_grid.^2+v_grid.^2),'Linecolor', 'none')
 colorbar
-quiver(x_grid,z_grid,u_grid,v_grid)
+quiver(x_grid(1:2:end,1:2:end),z_grid(1:2:end,1:2:end),u_grid(1:2:end,1:2:end),v_grid(1:2:end,1:2:end), 1.5, 'k')
 plot(xi,zi,'k','LineWidth', 1.5)
 hold off
 xlim([-chord 2*chord])
