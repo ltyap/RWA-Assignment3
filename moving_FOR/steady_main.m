@@ -46,7 +46,7 @@ for theta=deg2rad([-15:1:15])
 end
 
 figure()
-plot([-15:1:15], Cl)
+plot([-15:1:15], Cl, '-o', 'LineWidth', 1.5)
 grid on
 grid minor
 xlabel("\alpha [^\circ]")
@@ -54,7 +54,7 @@ ylabel("C_L")
 
 %% Velocity and pressure field 
 p_atm = 101300;
-theta = deg2rad(15);
+theta = deg2rad(-5);
 Ngrid = 100;
 
 [x_grid, z_grid] = meshgrid(linspace(-chord,2*chord,Ngrid),linspace(-1.5*chord,1.5*chord,Ngrid)) ;

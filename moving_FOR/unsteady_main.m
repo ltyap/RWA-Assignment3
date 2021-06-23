@@ -6,12 +6,13 @@ Qinf = sqrt(Uinf^2+Winf^2);
 rho = 1.255;
 chord = 1;
 Npan = 10;  % number of panels
-k = 0.1; %[0.02,0.05,0.1] reduced frequency
+k = 0.1;%[0.02,0.05,0.1] reduced frequency
 omega = k*2*Uinf/chord;
 theta0 = 0.5;
 dt = 0.05;
-Nts = 100;  % number of time steps
+Nts = 200;  % number of time steps
 it = 0; % time step counter t = it*dt
+animation = 0;  % if animate velocity field
 
 % discretization
 panels = plate_discretization(chord, Npan);
@@ -72,24 +73,26 @@ plate_vert.coord = [[cos(kinematics.theta), sin(kinematics.theta); -sin(kinemati
 [u_grid, v_grid] = velocity_field(Uinf, Winf, x_grid, z_grid, plate_vert); % calculate velocity in field
 
 % plotting - velocity field
-figure(1)
-clf
-hold on
-contourf(x_grid,z_grid,sqrt(u_grid.^2+v_grid.^2),'Linecolor', 'none')
-colorbar
-quiver(x_grid(1:2:end,1:2:end),z_grid(1:2:end,1:2:end),u_grid(1:2:end,1:2:end),v_grid(1:2:end,1:2:end), 1.5, 'k')
-plot(temp(1,:), temp(2,:),'k','LineWidth', 1.5)
-hold off
-caxis([5 15])
-xlabel("x")
-ylabel("z")
-title("Velocity field")
-% scatter(vertices.x, vertices.z,10,'filled')
-axis equal
-ylim([-1 1])
-xlim([min(temp(1,:))-chord max(temp(1,:))+2*chord])
-drawnow;
-pause(0.01)
+if animation
+    figure(1)
+    clf
+    hold on
+    contourf(x_grid,z_grid,sqrt(u_grid.^2+v_grid.^2),'Linecolor', 'none')
+    colorbar
+    quiver(x_grid(1:2:end,1:2:end),z_grid(1:2:end,1:2:end),u_grid(1:2:end,1:2:end),v_grid(1:2:end,1:2:end), 1.5, 'k')
+    plot(temp(1,:), temp(2,:),'k','LineWidth', 1.5)
+    hold off
+    caxis([5 15])
+    xlabel("x")
+    ylabel("z")
+    title("Velocity field")
+    % scatter(vertices.x, vertices.z,10,'filled')
+    axis equal
+    ylim([-1 1])
+    xlim([min(temp(1,:))-chord max(temp(1,:))+2*chord])
+    drawnow;
+    pause(0.01)
+end
 
 % convect vertices - just with freestream, does not calculate induced velocity
 vertices.x = vertices.x+Uinf*dt;
