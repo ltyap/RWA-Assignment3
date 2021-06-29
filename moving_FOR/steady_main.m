@@ -54,7 +54,7 @@ end
 
 %% Velocity and pressure field 
 p_atm = 0;%101300;
-theta = deg2rad(-5);
+theta = deg2rad(10);
 Ngrid = 100;
 
 [x_grid, z_grid] = meshgrid(linspace(-chord,2*chord,Ngrid),linspace(-1.5*chord,1.5*chord,Ngrid)) ;

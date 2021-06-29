@@ -1,6 +1,6 @@
 clc; clear all; close all;
 
-Uinf = 10;
+Uinf = 1;
 Winf = 0;
 Qinf = sqrt(Uinf^2+Winf^2);
 rho = 1.255;
@@ -8,9 +8,9 @@ chord = 1;
 Npan = 10;  % number of panels
 k = 0.1;%[0.02,0.05,0.1] reduced frequency
 omega = k*2*Uinf/chord;
-theta0 = 0.15;
+theta0 = 0.175;
 dt = 0.1;
-Nts = 100;  % number of time steps
+Nts = 400;  % number of time steps
 it = 0; % time step counter t = it*dt
 animation = 0;  % if animate velocity field
 
@@ -44,13 +44,14 @@ kinematics.thetadot = theta0*omega*cos(omega*t);
 vertices.gamma = [];
 vertices.x = [];
 vertices.z = [];
-[Cl_0,~,~,gamma_old] = LumpedVortex(1, Npan, kinematics, coeff, panels, chord, Qinf, rho, vertices);
 
 p_atm = 0; %101300;
 Ngrid = 100;
-
+gamma_old = zeros(Npan,1);  % at t=0 no circulation
 TE_new = [cos(kinematics.theta), sin(kinematics.theta); -sin(kinematics.theta), cos(kinematics.theta)]*[panels.x(end);panels.z(end)]+[kinematics.X0;kinematics.Z0] ;    %location of TE at t=dt
+
 for it=1:Nts
+    
     % old TE position
     TE_old = TE_new;
     
@@ -64,7 +65,7 @@ for it=1:Nts
     
     
     [Cl(it),~,vertices, gamma, Cl_c(it), Cl_nc(it)] = LumpedVortex(0, Npan, kinematics, coeff, panels, chord, Qinf, rho, vertices, TE_old, TE_new, gamma_old, dt);
-    gamma_old = gamma;
+    gamma_old = gamma(1:end-1);
     plate_vert.gamma = [gamma(1:end-1);vertices.gamma'];   % vertices on the panels
     plate_vert.coord = [[cos(kinematics.theta), sin(kinematics.theta); -sin(kinematics.theta), cos(kinematics.theta)]*[panels.xj;panels.zj]+...
         [kinematics.X0;kinematics.Z0], [vertices.x;vertices.z]] ;
@@ -104,12 +105,13 @@ end
 figure()
 hold on
 plot(rad2deg(theta0*sin([1:Nts]*omega*dt)),Cl_c)
+plot(rad2deg(theta0*sin([1:Nts]*omega*dt)),Cl)
 plot(rad2deg(theta0*sin([1:Nts]*omega*dt)),Cl_nc)
-quiver(rad2deg(theta0*sin(1*omega*dt)), Cl_c(1),rad2deg(theta0*sin(2*omega*dt)- theta0*sin(1*omega*dt)) ,Cl_c(2)-Cl_c(1))
+% quiver(rad2deg(theta0*sin(1*omega*dt)), Cl_c(1),rad2deg(theta0*sin(2*omega*dt)- theta0*sin(1*omega*dt)) ,Cl_c(2)-Cl_c(1))
 hold off
 grid on
 grid minor
-legend(["circulatory", "non-circulatory", ""])
+legend(["circulatory", "circulatory+non-circulatory", "non-circulatory"])
 xlabel("\theta [^\circ]")
 ylabel("C_L")
 
