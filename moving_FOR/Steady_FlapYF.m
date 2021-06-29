@@ -23,7 +23,7 @@ for beta=[0 5 10 20 30]
   for alpha=[-10:1:10]
     alpha    
     rho=1.225;
-    U_inf=10;
+    U_inf=1;
     c=1;                         % Chord length
     x=linspace(0,3*c,N_mesh);
     z=linspace(0,3*c,N_mesh);
@@ -96,7 +96,7 @@ h = pcolor(X,Z,V_field);
 set(h, 'EdgeColor', 'none');
 colormap pink(32)
 g=colorbar;
-caxis([3 20])
+caxis([0.3 1.8])
 shading interp
 title("Velocity field")
 xlabel("x")
@@ -114,7 +114,7 @@ h = pcolor(X,Z,p_field);
 set(h, 'EdgeColor', 'none');
 colormap pink(32)
 g=colorbar;
-caxis([-150 100])
+caxis([-1.8 1.8])
 shading interp
 title("Pressure field")
 xlabel("x")

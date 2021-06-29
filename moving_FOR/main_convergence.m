@@ -1,18 +1,29 @@
 %% checking convergence - reaction to step change
 clc; clear all; close all;
 
-Uinf = 10;
+Uinf = 1;
 Winf = 0;
 Qinf = sqrt(Uinf^2+Winf^2);
 rho = 1.255;
 chord = 1;
-Npan = 10;  % number of panels
+Npan_array = 10;%[2,10,20,50];  % number of panels
 k = 0.1; %[0.02,0.05,0.1] reduced frequency
 omega = k*2*Uinf/chord;
 theta0 = deg2rad(10); % here - step change in angle of attack
-dt = 0.1;
-Nts = 100;  % number of time steps
+dt_array = [1,0.5,0.1,0.01];
+Nts = 1000;  % number of time steps
 it = 0; % time step counter t = it*dt
+
+styles = {'-', '--', '-.',':', '-','--'};
+colors = [[0, 0.4470, 0.7410]; [0.8500, 0.3250, 0.0980]; [0.4940, 0.1840, 0.5560];[0.4660, 0.6740, 0.1880]]; % define color scheme, more colors need to be added for larger analysis
+
+figure()
+hold on
+
+for n=1:length(Npan_array)
+    for d=1:length(dt_array)
+        dt=dt_array(d);
+Npan=Npan_array(n);
 
 % discretization
 panels = plate_discretization(chord, Npan);
@@ -73,14 +84,19 @@ for it=1:Nts
     vertices.x = vertices.x+Uinf*dt;
     vertices.z = vertices.z+Winf*dt;
 end
+plot([1:Nts]*dt, Cl, 'linestyle',styles{d}, 'Color', colors(d,:), 'DisplayName',sprintf('dt = %.2f', dt))
 
-figure()
-hold on
-plot([1:Nts]*dt, Cl_c)
-plot([1:Nts]*dt, Cl)
+    end
+end
+cl_steady = load('steady_CL.mat');
+plot([0,100], cl_steady.Cl(15+11)*ones(2,1), '--k', 'DisplayName',sprintf('steady'))% calculated from steady case
 hold off
 grid on
 grid minor
+ylim([0 1.2])
+xlim([0 70])
+legend show
+% legend(["potential", "circulatory", "steady"])
 xlabel("t")
 ylabel("C_L")
 

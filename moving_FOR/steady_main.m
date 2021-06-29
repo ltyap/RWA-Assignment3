@@ -1,5 +1,5 @@
 clc; clear all; close all;
-Uinf = 10;
+Uinf = 1;
 Winf = 0;
 Qinf = sqrt(Uinf^2+Winf^2);
 rho = 1.255;
@@ -34,23 +34,23 @@ for i=1:Npan
 end
 
 %% Cl vs alpha
-% Cl = [];
-% for theta=deg2rad([-15:1:15])
-%     kinematics.theta = theta;
-%     temp = [cos(kinematics.theta), sin(kinematics.theta); -sin(kinematics.theta), cos(kinematics.theta)]*[panels.x;panels.z]+[kinematics.X0;kinematics.Z0] ;    %location of TE at t=dt
-%     X = temp(1,:);
-%     Z = temp(2,:);
-%     
-%     [temp] = LumpedVortex(1, Npan, kinematics, coeff, panels, chord, Qinf, rho);
-%     Cl = [Cl,temp];
-% end
-% 
-% figure()
-% plot([-15:1:15], Cl, '-o', 'LineWidth', 1.5)
-% grid on
-% grid minor
-% xlabel("\alpha [^\circ]")
-% ylabel("C_L")
+Cl = [];
+for theta=deg2rad([-15:1:15])
+    kinematics.theta = theta;
+    temp = [cos(kinematics.theta), sin(kinematics.theta); -sin(kinematics.theta), cos(kinematics.theta)]*[panels.x;panels.z]+[kinematics.X0;kinematics.Z0] ;    %location of TE at t=dt
+    X = temp(1,:);
+    Z = temp(2,:);
+    
+    [temp] = LumpedVortex(1, Npan, kinematics, coeff, panels, chord, Qinf, rho);
+    Cl = [Cl,temp];
+end
+
+figure()
+plot([-15:1:15], Cl, '-o', 'LineWidth', 1.5)
+grid on
+grid minor
+xlabel("\alpha [^\circ]")
+ylabel("C_L")
 
 %% Velocity and pressure field 
 p_atm = 0;%101300;
@@ -75,7 +75,7 @@ h = pcolor(x_grid,z_grid,p_grid);
 set(h, 'EdgeColor', 'none');
 colormap pink(32)
 g=colorbar;
-caxis([-50 50])
+caxis([-1 1])
 shading interp
 % contourf(x_grid,z_grid,p_grid,'Linecolor', 'none')
 plot(plate(1,:),plate(2,:), 'k','LineWidth', 4)
@@ -93,7 +93,7 @@ h = pcolor(x_grid,z_grid,sqrt(u_grid.^2+v_grid.^2));
 set(h, 'EdgeColor', 'none');
 colormap pink(32)
 g=colorbar;
-caxis([8 12])
+caxis([0.7 1.5])
 shading interp
 % contourf(x_grid,z_grid,sqrt(u_grid.^2+v_grid.^2),'Linecolor', 'none')
 % colorbar

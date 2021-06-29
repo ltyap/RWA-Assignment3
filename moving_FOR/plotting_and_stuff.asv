@@ -1,6 +1,6 @@
 clc; clear all; close all;
 
-Uinf = 1;
+Uinf = 11;
 Winf = 0;
 Qinf = sqrt(Uinf^2+Winf^2);
 rho = 1.255;
@@ -31,12 +31,12 @@ ylabel("\theta")
 %% different k
 clear t
 for i=1:length(k)
-    temp= load("unsteady_cl_theta_k"+k(i)+".mat");
-    t(i,:) = temp.Cl(1,:);
+    temp= load("unsteady_time_k"+k(i)+".mat");
+    t(i,:) = temp(1,:);
 % %     temp= load("unsteady_theta_k"+k(i)+".mat");
-    theta(i,:) = theta0*sin(k(i)*2*Uinf/chord*t(i,:));
-%     temp= load("unsteady_cl_theta_k"+k(i)+".mat");
-    cl(i,:) = temp.Cl(2,:);
+    theta(i,:) = theta0*sin(omega*t());
+    temp= load("unsteady_cl_theta_k"+k(i)+".mat");
+    cl(i,:) = temp(2,:);
 end
 
 figure()
@@ -63,6 +63,6 @@ hold off
 grid on
 grid minor
 legend show
-xlim ([0,250])
+xlim ([0,400])
 xlabel("reduced time")
 ylabel("C_L")
