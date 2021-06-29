@@ -8,9 +8,9 @@ chord = 1;
 Npan = 10;  % number of panels
 k = 0.1;%[0.02,0.05,0.1] reduced frequency
 omega = k*2*Uinf/chord;
-theta0 = 0.5;
-dt = 0.05;
-Nts = 200;  % number of time steps
+theta0 = 0.15;
+dt = 0.1;
+Nts = 100;  % number of time steps
 it = 0; % time step counter t = it*dt
 animation = 0;  % if animate velocity field
 
@@ -43,66 +43,73 @@ kinematics.thetadot = theta0*omega*cos(omega*t);
 
 vertices.gamma = [];
 vertices.x = [];
-vertices.z = [];   
+vertices.z = [];
 [Cl_0,~,~,gamma_old] = LumpedVortex(1, Npan, kinematics, coeff, panels, chord, Qinf, rho, vertices);
 
-p_atm = 101300;
+p_atm = 0; %101300;
 Ngrid = 100;
 
 TE_new = [cos(kinematics.theta), sin(kinematics.theta); -sin(kinematics.theta), cos(kinematics.theta)]*[panels.x(end);panels.z(end)]+[kinematics.X0;kinematics.Z0] ;    %location of TE at t=dt
 for it=1:Nts
-% old TE position
-TE_old = TE_new;
+    % old TE position
+    TE_old = TE_new;
     
-t = it*dt;
-kinematics.X0 = -Uinf*t;   % position of LE
-kinematics.theta = theta0*sin(omega*t);
-kinematics.thetadot = theta0*omega*cos(omega*t);
-
-TE_new = [cos(kinematics.theta), sin(kinematics.theta); -sin(kinematics.theta), cos(kinematics.theta)]*[panels.x(end);panels.z(end)]+[kinematics.X0;kinematics.Z0];    %location of TE at t=dt
-temp = [cos(kinematics.theta), sin(kinematics.theta); -sin(kinematics.theta), cos(kinematics.theta)]*[panels.x;panels.z]+[kinematics.X0;kinematics.Z0];    %location of TE at t=dt
-
-
-[Cl(it),~,vertices, gamma] = LumpedVortex(0, Npan, kinematics, coeff, panels, chord, Qinf, rho, vertices, TE_old, TE_new, gamma_old, dt);
-gamma_old = gamma;
-plate_vert.gamma = [gamma(1:end-1);vertices.gamma'];   % vertices on the panels
-plate_vert.coord = [[cos(kinematics.theta), sin(kinematics.theta); -sin(kinematics.theta), cos(kinematics.theta)]*[panels.xj;panels.zj]+...
-    [kinematics.X0;kinematics.Z0], [vertices.x;vertices.z]] ;
-
-[x_grid, z_grid] = meshgrid(linspace(temp(1,1)-chord,temp(1,end)+2*chord,Ngrid),linspace(-1.5*chord,1.5*chord,Ngrid)) ;
-[u_grid, v_grid] = velocity_field(Uinf, Winf, x_grid, z_grid, plate_vert); % calculate velocity in field
-
-% plotting - velocity field
-if animation
-    figure(1)
-    clf
-    hold on
-    contourf(x_grid,z_grid,sqrt(u_grid.^2+v_grid.^2),'Linecolor', 'none')
-    colorbar
-    quiver(x_grid(1:2:end,1:2:end),z_grid(1:2:end,1:2:end),u_grid(1:2:end,1:2:end),v_grid(1:2:end,1:2:end), 1.5, 'k')
-    plot(temp(1,:), temp(2,:),'k','LineWidth', 1.5)
-    hold off
-    caxis([5 15])
-    xlabel("x")
-    ylabel("z")
-    title("Velocity field")
-    % scatter(vertices.x, vertices.z,10,'filled')
-    axis equal
-    ylim([-1 1])
-    xlim([min(temp(1,:))-chord max(temp(1,:))+2*chord])
-    drawnow;
-    pause(0.01)
-end
-
-% convect vertices - just with freestream, does not calculate induced velocity
-vertices.x = vertices.x+Uinf*dt;
-vertices.z = vertices.z+Winf*dt;
+    t = it*dt;
+    kinematics.X0 = -Uinf*t;   % position of LE
+    kinematics.theta = theta0*sin(omega*t);
+    kinematics.thetadot = theta0*omega*cos(omega*t);
+    
+    TE_new = [cos(kinematics.theta), sin(kinematics.theta); -sin(kinematics.theta), cos(kinematics.theta)]*[panels.x(end);panels.z(end)]+[kinematics.X0;kinematics.Z0];    %location of TE at t=dt
+    temp = [cos(kinematics.theta), sin(kinematics.theta); -sin(kinematics.theta), cos(kinematics.theta)]*[panels.x;panels.z]+[kinematics.X0;kinematics.Z0];    %location of TE at t=dt
+    
+    
+    [Cl(it),~,vertices, gamma, Cl_c(it), Cl_nc(it)] = LumpedVortex(0, Npan, kinematics, coeff, panels, chord, Qinf, rho, vertices, TE_old, TE_new, gamma_old, dt);
+    gamma_old = gamma;
+    plate_vert.gamma = [gamma(1:end-1);vertices.gamma'];   % vertices on the panels
+    plate_vert.coord = [[cos(kinematics.theta), sin(kinematics.theta); -sin(kinematics.theta), cos(kinematics.theta)]*[panels.xj;panels.zj]+...
+        [kinematics.X0;kinematics.Z0], [vertices.x;vertices.z]] ;
+    
+    % plotting - velocity field
+    if animation %round(kinematics.theta)==theta0 | round(kinematics.theta)==-theta0 | round(kinematics.theta)==0  %animation
+        [x_grid, z_grid] = meshgrid(linspace(temp(1,1)-chord,temp(1,end)+2*chord,Ngrid),linspace(-1.5*chord,1.5*chord,Ngrid)) ;
+        [u_grid, v_grid] = velocity_field(Uinf, Winf, x_grid, z_grid, plate_vert); % calculate velocity in field
+        
+        figure()
+        clf
+        hold on
+        h = pcolor(x_grid,z_grid,sqrt(u_grid.^2+v_grid.^2));
+        set(h, 'EdgeColor', 'none');
+        colormap pink(32)
+        g=colorbar;
+        quiver(x_grid(1:2:end,1:2:end),z_grid(1:2:end,1:2:end),u_grid(1:2:end,1:2:end),v_grid(1:2:end,1:2:end), 1.5, 'k')
+        plot(temp(1,:), temp(2,:),'k','LineWidth', 4)
+        hold off
+        caxis([5 15])
+        xlabel("x")
+        ylabel("z")
+        title("Velocity field")
+        % scatter(vertices.x, vertices.z,10,'filled')
+        axis equal
+        ylim([-1 1])
+        xlim([min(temp(1,:))-chord max(temp(1,:))+2*chord])
+        drawnow;
+        pause(0.01)
+    end
+    
+    % convect vertices - just with freestream, does not calculate induced velocity
+    vertices.x = vertices.x+Uinf*dt;
+    vertices.z = vertices.z+Winf*dt;
 end
 
 figure()
-plot(rad2deg(theta0*sin([1:Nts]*omega*dt)),Cl)
+hold on
+plot(rad2deg(theta0*sin([1:Nts]*omega*dt)),Cl_c)
+plot(rad2deg(theta0*sin([1:Nts]*omega*dt)),Cl_nc)
+quiver(rad2deg(theta0*sin(1*omega*dt)), Cl_c(1),rad2deg(theta0*sin(2*omega*dt)- theta0*sin(1*omega*dt)) ,Cl_c(2)-Cl_c(1))
+hold off
 grid on
 grid minor
+legend(["circulatory", "non-circulatory", ""])
 xlabel("\theta [^\circ]")
 ylabel("C_L")
 
@@ -117,7 +124,10 @@ xlabel("t")
 ylabel("\theta")
 
 figure()
-plot([1:Nts]*dt, Cl)
+hold on
+plot([1:Nts]*dt, Cl_c)
+plot([1:Nts]*dt, Cl_nc)
+hold off
 grid on
 grid minor
 xlabel("t")

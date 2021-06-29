@@ -34,26 +34,26 @@ for i=1:Npan
 end
 
 %% Cl vs alpha
-Cl = [];
-for theta=deg2rad([-15:1:15])
-    kinematics.theta = theta;
+% Cl = [];
+% for theta=deg2rad([-15:1:15])
+%     kinematics.theta = theta;
 %     temp = [cos(kinematics.theta), sin(kinematics.theta); -sin(kinematics.theta), cos(kinematics.theta)]*[panels.x;panels.z]+[kinematics.X0;kinematics.Z0] ;    %location of TE at t=dt
 %     X = temp(1,:);
 %     Z = temp(2,:);
-    
-    [temp] = LumpedVortex(1, Npan, kinematics, coeff, panels, chord, Qinf, rho);
-    Cl = [Cl,temp];
-end
-
-figure()
-plot([-15:1:15], Cl, '-o', 'LineWidth', 1.5)
-grid on
-grid minor
-xlabel("\alpha [^\circ]")
-ylabel("C_L")
+%     
+%     [temp] = LumpedVortex(1, Npan, kinematics, coeff, panels, chord, Qinf, rho);
+%     Cl = [Cl,temp];
+% end
+% 
+% figure()
+% plot([-15:1:15], Cl, '-o', 'LineWidth', 1.5)
+% grid on
+% grid minor
+% xlabel("\alpha [^\circ]")
+% ylabel("C_L")
 
 %% Velocity and pressure field 
-p_atm = 101300;
+p_atm = 0;%101300;
 theta = deg2rad(-5);
 Ngrid = 100;
 
@@ -71,8 +71,14 @@ plate = [cos(kinematics.theta), sin(kinematics.theta); -sin(kinematics.theta), c
 
 figure()
 hold on
-contourf(x_grid,z_grid,p_grid,'Linecolor', 'none')
-plot(plate(1,:),plate(2,:), 'k','LineWidth', 1.5)
+h = pcolor(x_grid,z_grid,p_grid);
+set(h, 'EdgeColor', 'none');
+colormap pink(32)
+g=colorbar;
+caxis([-50 50])
+shading interp
+% contourf(x_grid,z_grid,p_grid,'Linecolor', 'none')
+plot(plate(1,:),plate(2,:), 'k','LineWidth', 4)
 hold off
 colorbar
 xlim([-chord 2*chord])
@@ -83,10 +89,17 @@ title("Pressure field")
 
 figure()
 hold on
-contourf(x_grid,z_grid,sqrt(u_grid.^2+v_grid.^2),'Linecolor', 'none')
-colorbar
-quiver(x_grid(1:2:end,1:2:end),z_grid(1:2:end,1:2:end),u_grid(1:2:end,1:2:end),v_grid(1:2:end,1:2:end), 1.5, 'k')
-plot(plate(1,:),plate(2,:),'k','LineWidth', 1.5)
+h = pcolor(x_grid,z_grid,sqrt(u_grid.^2+v_grid.^2));
+set(h, 'EdgeColor', 'none');
+colormap pink(32)
+g=colorbar;
+caxis([8 12])
+shading interp
+% contourf(x_grid,z_grid,sqrt(u_grid.^2+v_grid.^2),'Linecolor', 'none')
+% colorbar
+t=16;
+quiver(x_grid(1:t:end),z_grid(1:t:end),u_grid(1:t:end),v_grid(1:t:end), 1, 'k')
+plot(plate(1,:),plate(2,:),'k','LineWidth', 4)
 hold off
 xlim([-chord 2*chord])
 ylim([-1.5*chord 1.5*chord])

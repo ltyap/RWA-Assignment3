@@ -43,6 +43,8 @@ figure()
 hold on
 for i=1:length(k)
     plot(theta(i,:),cl(i,:),'linestyle',styles{i}, 'Color', colors(i,:), 'DisplayName',sprintf('k =%.2f', k(i)))
+%     h = quiver(theta(i,1),cl(i,1), theta(i,2)-theta(i,1), cl(i,2)-cl(i,1),1.5,'filled', 'Color', colors(i,:))
+%     h.Annotation.LegendInformation.IconDisplayStyle = 'off';
 end
 hold off
 grid on
@@ -51,14 +53,16 @@ legend show
 xlabel("\theta")
 ylabel("C_L")
 
+s=2*t*Uinf/chord; % in distance semichords
 figure()
 hold on
 for i=1:length(k)
-    plot(t(i,:),cl(i,:),'linestyle',styles{i}, 'Color', colors(i,:), 'DisplayName',sprintf('k =%.2f', k(i)))
+    plot(s(i,:),cl(i,:),'linestyle',styles{i}, 'Color', colors(i,:), 'DisplayName',sprintf('k =%.2f', k(i)))
 end
 hold off
 grid on
 grid minor
 legend show
-xlabel("t")
+xlim ([0,400])
+xlabel("semichords")
 ylabel("C_L")

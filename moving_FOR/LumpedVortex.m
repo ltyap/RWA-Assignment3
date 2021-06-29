@@ -1,4 +1,4 @@
-function [Cl,dp, vertices,gamma] = LumpedVortex(steady, N, kinematics, coeff, panels, chord, Qinf, rho, vertices, TE_old, TE_new, gamma_old, dt)
+function [Cl,dp, vertices,gamma, Cl_c, Cl_nc] = LumpedVortex(steady, N, kinematics, coeff, panels, chord, Qinf, rho, vertices, TE_old, TE_new, gamma_old, dt)
 temp = [cos(kinematics.theta), sin(kinematics.theta); -sin(kinematics.theta), cos(kinematics.theta)]*...
     [panels.xi;panels.zi]+[kinematics.X0; kinematics.Z0];
 panels.Xi = temp(1,:);
@@ -44,22 +44,31 @@ end
 % solve system
 gamma = coeff\rhs';
 
+%change!!!
+% panels.a = kinematics.theta*ones(N,1);  % angle of panel consistent with the following equations
+% panels.tau = [cos(panels.a), -sin(panels.a)]; % tangential components 
+
 % loads
 dp = zeros(1, length(gamma));
 dL = zeros(1, length(gamma));
 for i=1:N   % loop over each panel
     dl(i) = sqrt((panels.x(i)-panels.x(i+1))^2+(panels.z(i)-panels.z(i+1))^2);    % panel length
     if steady
-        dp(i) = rho*(dot([U(i),W(i)],panels.tau(i,:))*gamma(i)/dl(i));   % pressure difference on panel
+        dp(i) = rho*(dot([U(i);W(i)],panels.tau(i,:))*gamma(i)/dl(i));   % pressure difference on panel
     else
         dgamma = sum(gamma(1:i))-sum(gamma_old(1:i));
-        dp(i) = rho*(dot([U(i)+u_w(i),W(i)+w_w(i)],panels.tau(i,:))*gamma(i)/dl(i)+dgamma/dt);   % pressure difference on panel
+        dp(i) = rho*(dot([U(i)+u_w(i);W(i)+w_w(i)],panels.tau(i,:))*gamma(i)/dl(i)+dgamma/dt);   % pressure difference on panel
     end
     dL(i) = dp(i)*dl(i)*cos(panels.a(i));    % lift difference of panel
+    dL_c(i) = rho*Qinf*gamma(i);    % circulatory
 end
 
 dcp = dp/(0.5*rho*Qinf^2*chord);     % pressure coefficient distribution
-L = sum(dL);      % total lift
+L = sum(dL);      % total lift - circulatory+uncirculatory
+L_c = sum(dL_c);    % total lift - only circulatory (so from Kutta condition)
+L_nc = L-L_c;   % lift - non-circulatory
+Cl_c  = L_c/(0.5*rho*Qinf^2*chord); % circulatory loads
+Cl_nc  = L_nc/(0.5*rho*Qinf^2*chord); % non-circulatory loads
 Cl = L/(0.5*rho*Qinf^2*chord);    % total lift coefficient
 
 % add new vortex
@@ -70,5 +79,10 @@ if ~steady
 else
     vertices = [];
 end
+
+% Qt = dot([U+u_w',W+w_w'],panels.tau)
+
+% dL=rho*Qinf*gamma; % bad hack
+% CL = sum(dL)/(0.5*rho*Qinf^2*chord);
 
 end
