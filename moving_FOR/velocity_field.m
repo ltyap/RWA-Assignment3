@@ -9,9 +9,11 @@ for i=1:length(x_grid(:,1))
             temp = v_2D_from_vortex(plate_vert.gamma(k), plate_vert.coord(:,k)', [x_grid(i,j), z_grid(i,j)]);
             vel_ind = vel_ind+temp;
         end
-        for k=1:length(vertices.gamma)    % loop over all vortex points
-            temp = v_2D_from_vortex(vertices.gamma(k), [vertices.x(k), vertices.z(k)], [x_grid(i,j), z_grid(i,j)]);
-            vel_ind = vel_ind+temp;
+        if nargin>5
+            for k=1:length(vertices.gamma)    % loop over all vortex points
+                temp = v_2D_from_vortex(vertices.gamma(k), [vertices.x(k), vertices.z(k)], [x_grid(i,j), z_grid(i,j)]);
+                vel_ind = vel_ind+temp;
+            end
         end
         u_grid(i,j) = vel_ind(1);
         w_grid(i,j) = vel_ind(2);

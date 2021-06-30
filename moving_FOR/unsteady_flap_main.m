@@ -6,17 +6,19 @@ Qinf = sqrt(Uinf^2+Winf^2);
 rho = 1.255;
 chord = 1;
 Npan = 10;  % number of panels
-k = 0.02;%[0.02,0.05,0.1] reduced frequency
+k = 0.1;%[0.02,0.05,0.1] reduced frequency
 omega = k*2*Uinf/chord;
 theta0 = 0.175;
-dt = 1;
+dt = 0.2;
 Nts = 300;  % number of time steps
 it = 0; % time step counter t = it*dt
 animation = 0;  % if animate velocity field
-flap=0; % no flap
+flap = 1;   % bool property
+flap_c = 0.2;     % x/c of flap wrt the chord
+beta = deg2rad(20);
 
 % discretization
-panels = plate_discretization(chord, Npan, flap);
+panels = plate_discretization(chord, Npan, flap, beta, flap_c);
 
 % self-induced velocity
 u = zeros(Npan, Npan);
@@ -52,7 +54,6 @@ gamma_old = zeros(Npan,1);  % at t=0 no circulation
 TE_new = [cos(kinematics.theta), sin(kinematics.theta); -sin(kinematics.theta), cos(kinematics.theta)]*[panels.x(end);panels.z(end)]+[kinematics.X0;kinematics.Z0] ;    %location of TE at t=dt
 
 for it=1:Nts
-    
     % old TE position
     TE_old = TE_new;
     
@@ -72,7 +73,7 @@ for it=1:Nts
         [kinematics.X0;kinematics.Z0], [vertices.x;vertices.z]] ;
     
     % plotting - velocity field
-    if t==39 %round(kinematics.theta)==theta0 | round(kinematics.theta)==-theta0 | round(kinematics.theta)==0  %animation
+    if t==7.4 
         [x_grid, z_grid] = meshgrid(linspace(temp(1,1)-chord,temp(1,end)+2*chord,Ngrid),linspace(-1.5*chord,1.5*chord,Ngrid)) ;
         [u_grid, v_grid] = velocity_field(Uinf, Winf, x_grid, z_grid, plate_vert, vertices); % calculate velocity in field
         

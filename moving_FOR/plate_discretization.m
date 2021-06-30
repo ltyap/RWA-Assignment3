@@ -1,7 +1,12 @@
-function panels = plate_discretization(chord, N)
+function panels = plate_discretization(chord, N, flap, beta, flap_c)
 % creates flat plate
 panels.x = 0:1/N:chord;
 panels.z = zeros(1,N+1);
+if flap & nargin>3
+    [~,id] = find(panels.x >=(1-flap_c)*chord); % find the hinge
+    panels.z(id) = -sin(beta)*(panels.x(id)-(1-flap_c)*chord);% for all panels behind the hinge
+    panels.x(id) = (1-flap_c)*chord+cos(beta)*(panels.x(id)-(1-flap_c)*chord);% for all panels behind the hinge
+end
 
 panels.xj = zeros(1, N);
 panels.xi = zeros(1, N);
@@ -27,6 +32,6 @@ end
 
 panels.tau = [cos(panels.a'), -sin(panels.a')]; % tangential components
 
-panels.eta = zeros(1,N);    % camber
+panels.eta = -(panels.zi+panels.zj);    % camber - at middle of panels, so average of collocation and vortex points
 panels.deta = zeros(1,N);   % time change of camber
 end

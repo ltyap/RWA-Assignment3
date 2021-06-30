@@ -5,11 +5,12 @@ Qinf = sqrt(Uinf^2+Winf^2);
 rho = 1.255;
 t = 0;
 omega = 0;
+flap=0;
 
 % discretization
 Npan = 10;
 chord = 1;
-panels = plate_discretization(chord, Npan);
+panels = plate_discretization(chord, Npan, flap);
 
 % for movement to the left at speed Uinf and pitch osciallation at
 % frequency omega
